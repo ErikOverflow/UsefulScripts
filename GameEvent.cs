@@ -25,6 +25,15 @@ public class GameEvent : ScriptableObject
         }
     }
 
+    public void Raise(int num)
+    {
+        for (int i = listeners.Count - 1; i >= 0; i--)
+        {
+            listeners[i].OnEventsRaised(num);
+            listeners[i].OnEventsRaised();
+        }
+    }
+
     public void RegisterListener(GameEventListener listener)
     {
         listeners.Add(listener);

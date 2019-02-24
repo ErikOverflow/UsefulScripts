@@ -7,10 +7,17 @@ using UnityEngine.Events;
 
 public class GameEventListener : MonoBehaviour
 {
+    public enum ListenerType
+    {
+        Standard,
+        GameObject,
+        Integer
+    }
     public GameEvent Event;
-    public bool ContainsGameObject;
+    public ListenerType listenerType;
     public UnityEvent Response;
     public EventGameObject ResponseWithObject;
+    public EventInteger ResponseWithInteger;
 
     private void OnEnable()
     {
@@ -31,10 +38,18 @@ public class GameEventListener : MonoBehaviour
     {
         ResponseWithObject.Invoke(go);
     }
+
+    public void OnEventsRaised(int num)
+    {
+        ResponseWithInteger.Invoke(num);
+    }
 }
 
 [Serializable]
 public class EventGameObject : UnityEvent<GameObject> { }
+
+[Serializable]
+public class EventInteger : UnityEvent<int> { }
 
 [CustomEditor(typeof(GameEventListener))]
 [CanEditMultipleObjects]
@@ -45,18 +60,19 @@ public class GameEventListenerEditor : Editor
         serializedObject.Update();
         GameEventListener gel = target as GameEventListener;
         EditorGUILayout.BeginHorizontal();
-        gel.ContainsGameObject = EditorGUILayout.Toggle("Does this Event contain a GameObject?", gel.ContainsGameObject);
+        gel.listenerType = (GameEventListener.ListenerType) EditorGUILayout.EnumPopup("Does this Event contain a GameObject?", gel.listenerType);
         EditorGUILayout.EndHorizontal();
 
-        gel.Event = (GameEvent) EditorGUILayout.ObjectField("Event", gel.Event, typeof(GameEvent), true);
+        gel.Event = (GameEvent)EditorGUILayout.ObjectField("Event", gel.Event, typeof(GameEvent), true);
 
-        if (gel.ContainsGameObject)
+        EditorGUILayout.PropertyField(this.serializedObject.FindProperty("Response"));
+        if (gel.listenerType == GameEventListener.ListenerType.GameObject)
         {
             EditorGUILayout.PropertyField(this.serializedObject.FindProperty("ResponseWithObject"));
         }
-        else
+        if (gel.listenerType == GameEventListener.ListenerType.Integer)
         {
-            EditorGUILayout.PropertyField(this.serializedObject.FindProperty("Response"));
+            EditorGUILayout.PropertyField(this.serializedObject.FindProperty("ResponseWithInteger"));
         }
         serializedObject.ApplyModifiedProperties();
     }
