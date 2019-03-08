@@ -13,7 +13,7 @@ public class GameEventListener : MonoBehaviour
         GameObject,
         Integer
     }
-    public GameEvent Event;
+    public GameEvent[] Events;
     public ListenerType listenerType;
     public UnityEvent Response;
     public EventGameObject ResponseWithObject;
@@ -21,12 +21,18 @@ public class GameEventListener : MonoBehaviour
 
     private void OnEnable()
     {
-        Event.RegisterListener(this);
+        foreach(GameEvent e in Events)
+        {
+            e.RegisterListener(this);
+        }
     }
 
     private void OnDisable()
     {
-        Event.UnregisterListener(this);
+        foreach (GameEvent e in Events)
+        {
+            e.UnregisterListener(this);
+        }
     }
 
     public void OnEventsRaised()
@@ -60,10 +66,10 @@ public class GameEventListenerEditor : Editor
         serializedObject.Update();
         GameEventListener gel = target as GameEventListener;
         EditorGUILayout.BeginHorizontal();
-        gel.listenerType = (GameEventListener.ListenerType) EditorGUILayout.EnumPopup("Does this Event contain a GameObject?", gel.listenerType);
+        gel.listenerType = (GameEventListener.ListenerType) EditorGUILayout.EnumPopup("Payload Type: ", gel.listenerType);
         EditorGUILayout.EndHorizontal();
 
-        gel.Event = (GameEvent)EditorGUILayout.ObjectField("Event", gel.Event, typeof(GameEvent), true);
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("Events"), true);
 
         EditorGUILayout.PropertyField(this.serializedObject.FindProperty("Response"));
         if (gel.listenerType == GameEventListener.ListenerType.GameObject)
